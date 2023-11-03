@@ -2,14 +2,13 @@ namespace projv1
 {
     public partial class gameForm : Form
     {
-
-        Image gamePlayer, puszkaPiwo;
+        Image gameBackground;
+        Image gamePlayer, puszkaPiwo, banan;
 
         bool moveLeft, moveRight, moveJump;
         bool takeItem;
-        bool holdingItem;
-        bool czyWzialPuszke = false;
-        int speed = 15;
+        bool holdingItem = false;
+        int speed = 7;
         int gravity = 25;
         int force;
         int positionX = 50;
@@ -17,17 +16,26 @@ namespace projv1
         int puskaX = 1130;
         int height = 110;
         int width = 110;
+        int bg_X = 0;
+        int bg_Y = 0;
+        string itemTag = "";
+
+
+      
+
+
 
         public gameForm()
         {
             InitializeComponent();
-            this.BackgroundImage = Image.FromFile("background_all_closed.png");
-            this.BackgroundImageLayout = ImageLayout.Stretch;
 
+
+
+
+            gameBackground = Image.FromFile("background_all_closed.png");
             puszkaPiwo = Image.FromFile("puszka.png");
+            banan = Image.FromFile("banana_peel.png");
             gamePlayer = Image.FromFile("bigmalpa.png");
-
-
 
 
 
@@ -58,11 +66,34 @@ namespace projv1
 
             if (moveLeft && positionX > 0)
             {
+                gamePlayer = Image.FromFile("bigmalpa.png");
                 positionX -= speed;
+                if (bg_X < 0)
+                {
+                    bg_X += speed - 1;
+                    obstacleOne.Left += speed - 1;
+                    yellowBox.Left += speed - 1;
+                    blueBox.Left += speed - 1;
+                    greenBox.Left += speed - 1;
+                    brownBox.Left += speed - 1;
+                }
             }
             if (moveRight && positionX + width < this.ClientSize.Width)
             {
+                gamePlayer = Image.FromFile("bigmalpa_reversed.png");
                 positionX += speed;
+
+                if (bg_X + gameBackground.Width > this.ClientSize.Width)
+                {
+                    bg_X -= speed - 1;
+                    obstacleOne.Left -= speed - 1;
+                    yellowBox.Left -= speed - 1;
+                    blueBox.Left -= speed - 1;
+                    brownBox.Left -= speed - 1;
+                    greenBox.Left -= speed - 1;
+                }
+
+
             }
 
             if (moveJump)
@@ -74,7 +105,6 @@ namespace projv1
             {
                 positionY = this.ClientSize.Height - height;
                 moveJump = false;
-
             }
             else
             {
@@ -91,22 +121,106 @@ namespace projv1
 
             }
 
-            if (((positionX + width > piwoPanel.Left && positionX + width < piwoPanel.Right) || (positionX > piwoPanel.Left && positionX < piwoPanel.Right)) && !czyWzialPuszke)
+            if (!holdingItem && ((positionX + width > piwoPanel.Left && positionX + width < piwoPanel.Right) || (positionX > piwoPanel.Left && positionX < piwoPanel.Right)))
             {
                 pressButtonText.Text = "Naciœnij E aby wzi¹æ przedmiot";
 
                 if (takeItem)
                 {
-                    czyWzialPuszke = true;
+
                     puskaX = -500;
                     holdingItem = true;
-                }
+                    itemTag = "plastic";
 
+                }
             }
             else
             {
                 pressButtonText.Text = "";
             }
+
+            if (!holdingItem && ((positionX + width > bananaPanel.Left && positionX + width < bananaPanel.Right) || (positionX > bananaPanel.Left && positionX < bananaPanel.Right)))
+            {
+                pressButtonText.Text = "Naciœnij E aby wzi¹æ przedmiot";
+
+                if (takeItem)
+                {
+
+                    bananaPanel.Left = -500;
+                    holdingItem = true;
+                    itemTag = "bio";
+
+                }
+            }
+            else
+            {
+                pressButtonText.Text = "";
+            }
+
+
+
+
+            if (positionX < yellowBox.Right && positionX > yellowBox.Left && positionX + width < yellowBox.Right && positionX + width > yellowBox.Left)
+            {
+
+                gameBackground = Image.FromFile("background_yellow_open.png");
+
+
+                pressButtonText.Text = "Naciœnij E aby wyrzuciæ przedmiot";
+
+                if (takeItem && holdingItem)
+                {
+                    if (itemTag == "plastic" || itemTag == "")
+                    {
+                        holdingItem = false;
+                    }
+                    else
+                    {
+                        pressButtonText.Text = "PRZEGRANA, TO JEST POJEMNIK NA PLASTIK";
+
+                    }
+                }
+
+            }
+            if (positionX < blueBox.Right && positionX > blueBox.Left && positionX + width < blueBox.Right && positionX + width > blueBox.Left)
+            {
+                gameBackground = Image.FromFile("background_blue_open.png");
+                pressButtonText.Text = "Naciœnij E aby wyrzuciæ przedmiot";
+
+
+                if (takeItem && holdingItem)
+                {
+                    if (itemTag == "paper" || itemTag == "")
+                    {
+                        holdingItem = false;
+                    }
+                    else
+                    {
+                        pressButtonText.Text = "PRZEGRANA, TO JEST POJEMNIK NA PAPIER";
+
+                    }
+                }
+            }
+            if (positionX < greenBox.Right && positionX > greenBox.Left && positionX + width < greenBox.Right && positionX + width > greenBox.Left)
+            {
+                gameBackground = Image.FromFile("background_green_open.png");
+                pressButtonText.Text = "Naciœnij E aby wyrzuciæ przedmiot";
+
+            }
+            if (positionX < brownBox.Right && positionX > brownBox.Left && positionX + width < brownBox.Right && positionX + width > brownBox.Left)
+            {
+                gameBackground = Image.FromFile("background_brown_open.png");
+                pressButtonText.Text = "Naciœnij E aby wyrzuciæ przedmiot";
+
+            }
+            if (positionX > brownBox.Right || betweemBoxes())
+            {
+                gameBackground = Image.FromFile("background_all_closed.png");
+
+            }
+
+
+
 
 
 
@@ -164,7 +278,9 @@ namespace projv1
         {
             Graphics Canvas = e.Graphics;
 
-            Canvas.DrawImage(puszkaPiwo, puskaX, 397, 164, 144);
+            Canvas.DrawImage(gameBackground, bg_X, bg_Y);
+            Canvas.DrawImage(puszkaPiwo, 1100, 397, 164, 144);
+            Canvas.DrawImage(banan, bananaPanel.Left, bananaPanel.Top, bananaPanel.Width, bananaPanel.Height);
             Canvas.DrawImage(gamePlayer, positionX, positionY, width, height);
 
         }
@@ -178,5 +294,27 @@ namespace projv1
         {
 
         }
+
+        public bool betweemBoxes()
+        {
+            if ((positionX > yellowBox.Right && positionX < greenBox.Left) ||
+               (positionX + width > yellowBox.Right && positionX + width < greenBox.Left) ||
+                (positionX > greenBox.Right && positionX < blueBox.Left) ||
+                (positionX + width > greenBox.Right && positionX + width < blueBox.Left) ||
+                (positionX > blueBox.Right && positionX < brownBox.Left) ||
+                (positionX + width > blueBox.Right && positionX + width < brownBox.Left))
+            {
+
+                return true;
+
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
+
     }
 }
